@@ -79,6 +79,7 @@ cmdline
 ]c	equ 4
 
 	mx %00
+*	brk $ea
 	; x:y is command line ptr.
 	sty 0
 	stx 2
@@ -96,6 +97,7 @@ cmdline
 	lda 0
 	ora 2
 	beq :eof2
+	lda #0  ; clear b accumulator for tax.
 
 * skip past first word of command line.
 	sep $20
@@ -166,13 +168,20 @@ start
 
 	lda #$a0
 	sta >SoundAddr
+	lda #%0000_0_00_1 ; free-run, disabled
+	sta >SoundData
+	lda #%0001_0_00_1 ; free-run, disabled
+	sta >SoundData
 	lda #%0000_0_00_0 ; free-run, enabled
 	sta >SoundData
 	lda #%0001_0_00_0 ; free-run, enabled
 	sta >SoundData
-	lda #%0000_0_00_0 ; free-run, enabled
+
+* volume, again.
+	lda #$40
+	sta >SoundAddr
+	lda #$ff
 	sta >SoundData
-	lda #%0001_0_00_0 ; free-run, enabled
 	sta >SoundData
 
 
@@ -250,11 +259,12 @@ sound_irq
 
 	sep $30
 	bcc :off
-	lda _on
-	bne :trigger1
-	ldx #$ff
-	stx _on
-	jsr setvolume
+*	lda _on
+*	bne :trigger1
+*	ldx #$ff
+*	stx _on
+	jsr beep_on
+*	jsr setvolume
 
 	if border_color
 	lda >$e0c034 ; white border
@@ -271,9 +281,10 @@ sound_irq
 
 :off
 * turn off sound generators.
-	stz _on
-	ldx #0
-	jsr setvolume
+*	stz _on
+*	ldx #0
+*	jsr setvolume
+	jsr beep_off
 	if border_color
 	lda >$e0c034 ; black border
 	and #$f0
@@ -336,6 +347,38 @@ sound_irq
 	plb
 	clc
 	rtl
+
+beep_on
+	mx %11
+	lda _on
+	bne :rts
+	lda #$a0
+	sta >SoundAddr
+	lda #%0000_0_00_0 ; free-run, enabled
+	sta >SoundData
+	lda #%0001_0_00_0 ; free-run, enabled
+	sta >SoundData
+	inc _on
+** volume.
+*	lda #$40
+*	sta >SoundAddr
+*	lda #$ff
+*	sta >SoundData
+*	sta >SoundData
+:rts	rts
+
+beep_off ; changes to one-shot mode so it will expire at the end of the sample
+	mx %11
+	lda _on
+	beq :rts
+	lda #$a0
+	sta >SoundAddr
+	lda #%0000_0_01_0 ; one-shot, enabled
+	sta >SoundData
+	lda #%0001_0_01_0 ; one-shot, enabled
+	sta >SoundData
+	stz _on
+:rts	rts
 
 setvolume
 	mx %11
@@ -499,7 +542,7 @@ init
 	sta >SoundAddr+1
 
 	ldx #0
-]loop	lda beep,x
+]loop	lda beep_f5,x
 	sta >SoundData
 	inx
 	bne ]loop
@@ -532,7 +575,7 @@ init
 * pcm = [128 + round(127 * sin(n*xx)) for n in range(0,256)]
 
 
-beep
+beep_b5
 	hex 809fbcd5eaf8fefef5e6d1b6997a5b3f
 	hex 26130601030d1e344f6d8cabc7def0fb
 	hex fffbf0dec7ab8c6d4f341e0d03010613
@@ -550,6 +593,23 @@ beep
 	hex 0105102239557493b1cce2f3fdfffaed
 	hex dac1a586674a2f1a0b020208162b4461
 
+beep_f5
+	hex 8096abbfd1e0edf6fdfffef9f0e4d5c4
+	hex b19c86705b473424160c050102060d18
+	hex 26374a5e74899fb3c7d8e6f1fafefffc
+	hex f5ebdecebca8937d67523f2d1e110803
+	hex 010308111e2d3f52677d93a8bccedeeb
+	hex f5fcfffefaf1e6d8c7b39f89745e4a37
+	hex 26180d060201050c162434475b70869c
+	hex b1c4d5e4f0f9fefffdf6ede0d1bfab96
+	hex 806a55412f20130a03010207101c2b3c
+	hex 4f647a90a5b9ccdceaf4fbfffefaf3e8
+	hex dac9b6a28c77614d39281a0f06020104
+	hex 0b15223244586d8399aec1d3e2eff8fd
+	hex fffdf8efe2d3c1ae99836d5844322215
+	hex 0b040102060f1a28394d61778ca2b6c9
+	hex dae8f3fafefffbf4eadcccb9a5907a64
+	hex 4f3c2b1c10070201030a13202f41556a
 
 noise
 	hex 6c917262a488987a82a7895966a7589e
@@ -841,5 +901,6 @@ _buffer		ds 256
 
 	sav morse.l
 *	lst on
+	typ exe
 	sym
 
