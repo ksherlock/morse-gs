@@ -1,10 +1,13 @@
 
+	lst off
 	rel
 	xc
 	xc
 
 
 	tbx on
+
+border_color	equ 0
 
 SoundCtrl	equ $e0c03c
 SoundData	equ $e0c03d
@@ -49,6 +52,7 @@ main
 	phk
 	plb
 
+	jsr cmdline
 
 	jsr init
 	jsr start
@@ -68,6 +72,73 @@ main
 
 	lda #0
 	rtl
+
+
+cmdline
+]ptr	equ 0
+]c	equ 4
+
+	mx %00
+	; x:y is command line ptr.
+	sty 0
+	stx 2
+	stz ]c
+
+	ldx #0
+]loop   lda :default,x
+	sta _buffer,x
+	beq :eod
+	inx
+	inx
+	bra ]loop
+:eod
+
+	lda 0
+	ora 2
+	beq :eof2
+
+* skip past first word of command line.
+	sep $20
+	ldy #8
+]loop	lda [0],y
+	beq :eof2
+	iny
+	cmp #' '+1
+	bcs ]loop
+
+	ldx #0
+]loop	lda [0],y
+	beq :eof
+	iny
+	and #$7f
+	phx
+	tax
+	bit valid,x
+	plx
+	bvc :inval
+	sta _buffer,x
+	inx
+	stz ]c
+	bra ]loop
+:inval
+	lda ]c
+	bne ]loop
+	lda #' '
+	sta _buffer,x
+	inx
+	inc ]c
+	bra ]loop
+
+
+:eof
+	stz _buffer,x
+:eof2
+	rep $20
+	rts
+
+:default asc 'SOS',00,00,00
+
+
 
 start
 	mx %00
@@ -123,6 +194,15 @@ shutdown
 	psw #$b
 	psl old_irq
 	_SetVector
+
+	if border_color
+	sep $20
+	lda >$e0c034
+	and #$f0
+	ora old_border
+	sta >$e0c034
+	rep $20
+	fin
 	rts
 
 stop
@@ -176,6 +256,12 @@ sound_irq
 	stx _on
 	jsr setvolume
 
+	if border_color
+	lda >$e0c034 ; white border
+	ora #$0f
+	sta >$e0c034
+	fin
+
 :trigger1 ; osc 5 interrupt on
 	lda #$a0+timer_1
 	sta >SoundAddr
@@ -188,6 +274,12 @@ sound_irq
 	stz _on
 	ldx #0
 	jsr setvolume
+	if border_color
+	lda >$e0c034 ; black border
+	and #$f0
+	sta >$e0c034
+	fin
+
 * check for advance...
 	lda _template
 	bne :trigger1
@@ -270,6 +362,12 @@ init
 	_SetVector
 
 	sep $30
+
+	if border_color
+	lda >$e0c034
+	and #$0f
+	sta old_border
+	fin
 
 	docmode
 
@@ -601,17 +699,147 @@ table
 	adrl %00000000000000000000000000000000
 	adrl %00000000000000000000000000000000
 
+valid
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $40 ; !     ..--.
+	db $40 ; "     .-..-.
+	db $40 ; #     .-...
+	db $40 ; $     ...-..-
+	db $40 ; %     -...-.-
+	db $40 ; &     ...-.-
+	db $40 ; '     .----.
+	db $40 ; (     -.--.
+	db $40 ; )     -.--.-
+	db $40 ; *     ...-.
+	db $40 ; +     .-.-.
+	db $40 ; ,     --..--
+	db $40 ; -     -....-
+	db $40 ; .     .-.-.-
+	db $40 ; /     -..-.
+	db $40 ; 0     -----
+	db $40 ; 1     .----
+	db $40 ; 2     ..---
+	db $40 ; 3     ...--
+	db $40 ; 4     ....-
+	db $40 ; 5     .....
+	db $40 ; 6     -....
+	db $40 ; 7     --...
+	db $40 ; 8     ---..
+	db $40 ; 9     ----.
+	db $40 ; :     ---...
+	db $40 ; ;     -.-.-.
+	db $00
+	db $40 ; =     -...-
+	db $00
+	db $40 ; ?     ..--..
+	db $40 ; @     .--.-.
+	db $40 ; A     .-
+	db $40 ; B     -...
+	db $40 ; C     -.-.
+	db $40 ; D     -..
+	db $40 ; E     .
+	db $40 ; F     ..-.
+	db $40 ; G     --.
+	db $40 ; H     ....
+	db $40 ; I     ..
+	db $40 ; J     .---
+	db $40 ; K     -.-
+	db $40 ; L     .-..
+	db $40 ; M     --
+	db $40 ; N     -.
+	db $40 ; O     ---
+	db $40 ; P     .--.
+	db $40 ; Q     --.-
+	db $40 ; R     .-.
+	db $40 ; S     ...
+	db $40 ; T     -
+	db $40 ; U     ..-
+	db $40 ; V     ...-
+	db $40 ; W     .--
+	db $40 ; X     -..-
+	db $40 ; Y     -.--
+	db $40 ; Z     --..
+	db $00
+	db $00
+	db $00
+	db $00
+	db $40 ; _     ..--.-
+	db $00
+	db $40 ; a     .-
+	db $40 ; b     -...
+	db $40 ; c     -.-.
+	db $40 ; d     -..
+	db $40 ; e     .
+	db $40 ; f     ..-.
+	db $40 ; g     --.
+	db $40 ; h     ....
+	db $40 ; i     ..
+	db $40 ; j     .---
+	db $40 ; k     -.-
+	db $40 ; l     .-..
+	db $40 ; m     --
+	db $40 ; n     -.
+	db $40 ; o     ---
+	db $40 ; p     .--.
+	db $40 ; q     --.-
+	db $40 ; r     .-.
+	db $40 ; s     ...
+	db $40 ; t     -
+	db $40 ; u     ..-
+	db $40 ; v     ...-
+	db $40 ; w     .--
+	db $40 ; x     -..-
+	db $40 ; y     -.--
+	db $40 ; z     --..
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
 
 old_irq	ds 4
+old_border ds 2 
 quit	ds 2
 _active		ds 2
 _template	ds 4
 _on		ds 2
 _index		ds 2
-*_buffer		ds 256
-_buffer		asc 'SOS SOS SOS',00
+_buffer		ds 256
+*_buffer		asc 'Apple 2 forever',00
 
 	sav morse.l
-	lst on
+*	lst on
 	sym
 
