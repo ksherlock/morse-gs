@@ -1,4 +1,3 @@
-
 	lst off
 	rel
 	xc
@@ -9,6 +8,14 @@
 	use e16.event
 	use e16.types
 	use e16.control
+	use e16.resources
+
+*	lst on
+
+kWindowID equ $1000
+kPlayID	equ 1
+kStopID	equ 2
+kAboutAlert equ 1
 
 	tbx on
 
@@ -65,21 +72,34 @@ main
 		adrl 0
 		dw 0
 
+
+draw_window
+	pha
+	pha
+	_GetPort
+	_DrawControls
+	rtl
+
+
 mainloop
 
-
-	psl #0 ; result
+	pha
+	pha ; result
 	psl #0
 	psl #0
 	psl #draw_window
 	psl #0
-	psl #refIsResource
+	psw #refIsResource
 	psl #kWindowID
 	psw #rWindParam1
 	_NewWindow2
-	pll window
+	lda 3,s
+	sta window+2
+	lda 1,s
+	sta window
+*	pll window
 
-	psl window
+*	psl window
 	_ShowWindow
 
 	_InitCursor
@@ -93,13 +113,13 @@ mainloop
 :loop
 	pha
 	psw #-1
-	psl event
+	psl #event
 	_TaskMaster
 	pla
-	cmp #table_size+1
+	cmp #:table_size+1
 	bcs :loop
 
-	asl a
+	asl
 	jsr (:table,x)
 	lda quit
 	beq :loop
@@ -125,7 +145,7 @@ mainloop
 	dw :rts ; app 3
 	dw :rts ; app 4
 	dw :rts ; wInDesk
-	dw :menu ; wInMenuBar
+	dw menu ; wInMenuBar
 	dw :rts ; wClickCalled
 	dw :rts ; wInContent
 	dw :rts ; wInDrag
@@ -133,7 +153,7 @@ mainloop
 	dw bye ; wInGoAway
 	dw :rts ; wInZoom
 	dw :rts ; wInInfo
-	dw :menu ; wInSpecial menu 250-255
+	dw menu ; wInSpecial menu 250-255
 	dw :rts ; wInDeskItem menu 1-249
 	dw :rts ; wInFrame
 	dw :rts ; wInactMenu
@@ -141,7 +161,7 @@ mainloop
 	dw :rts ; wCalledSysEdit
 	dw :rts ; wTrackZoom
 	dw :rts ; wHitFrame
-	dw :control ; wInControl
+	dw control ; wInControl
 	dw :rts ; wInControlMenu
 :table_size = {*-:table}/2
 
@@ -149,7 +169,7 @@ mainloop
 	lda _finished
 	beq :rts
 	stz _finished
-	bra stopped
+	brl stopped
 
 bye
 	lda #1
@@ -164,12 +184,12 @@ menu
 	cmp #:table_size+1
 	bcs :xmenu
 
-	asl a
+	asl
 	tax
 	jsr (:table,x)
 :xmenu
 	psw #0
-	psw :event+owmTaskData+2
+	psw event+owmTaskData+2
 	_HiliteMenu
 :rts	rts
 
@@ -184,7 +204,14 @@ menu
 	dw about
 :table_size = {*-:table}/2
 
-
+about
+	pha
+	psw #awResource
+	psl #0
+	psl #kAboutAlert
+	_AlertWindow
+	pla
+	rts
 
 control
 	lda event+owmTaskData4 ; id of control selected.
@@ -215,12 +242,13 @@ play
 	psl #0 ; teHandle.
 	_TEGetText
 	pla
+*	sta :len
 	pla
-	sta :len
+
 	bcs :err
-	beq :err
 
 	jsr buffer_to_buffer
+	bcc :err ;
 
 * can use key filter to block invalid characters....
 * copy/convert :buffer to _buffer -still needed for space elimination,
@@ -243,7 +271,6 @@ play
 
 :err	rts
 
-:len	ds 2
 
 buffer_to_buffer
 :c	equ 0
@@ -273,7 +300,7 @@ buffer_to_buffer
 
 :space	inx
 	lda :c
-	bne ]loop
+	bne :loop
 	inc :c
 	lda #' '
 	sta _buffer,y
@@ -282,6 +309,8 @@ buffer_to_buffer
 
 :eof	sta _buffer,y
 	rep $20
+	tya ; len
+	cmp #1
 	rts
 
 
@@ -300,29 +329,8 @@ stopped
 	psl #kStopID
 	_HiliteCtlByID
 
-
 	rts
 
-
-
-	jsr init
-	jsr start
-
-	sep $30
-]wait	lda _active
-	beq :done
-	
-	lda >$e0c000 ; keydown - exit.
-	bpl ]wait
-	sta >$e0c010
-
-:done
-	rep $30
-	jsr shutdown
-
-
-	lda #0
-	rtl
 
 
 start_audio
@@ -567,14 +575,16 @@ init
 	mx %00
 
 	_TLStartUp
-	psl #0
+	pha
+	pha
 	psw MyID
 	psw #refIsResource
 	psl #1
 	_StartUpTools
 	pll tools
 
-	psl #0
+	pha
+	pha
 	psw #refIsResource
 	psl #1
 	psl #0
@@ -589,6 +599,7 @@ init
 
 	pha
 	_FixMenuBar
+	pla
 	_DrawMenuBar
 
 	jsr init_audio
@@ -765,7 +776,6 @@ init_audio
 	put tables
 
 old_irq	ds 4
-quit	ds 2
 
 tools	ds 4
 window	ds 4
