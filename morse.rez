@@ -1,0 +1,416 @@
+
+#include "Types.rez"
+
+#define WIN_HEIGHT 100
+#define WIN_WIDTH 400
+#define MENU_HEIGHT 12
+#define BUTTON_HEIGHT 13
+#define BUTTON_WIDTH 90
+#define kPlayID 1
+#define kStopID 2
+
+resource rWindParam1 (0x1000) {
+	0x8020,
+	0x1000E,
+	0x0,
+	{0, 0, 0, 0},
+	0x1000,
+	{0, 0},
+	{0, 0},
+	{0, 0},
+	{0, 0},
+	{0, 0},
+	0x0,
+	0,
+	{62, 120, 162, 520},
+	infront,
+	0x1000,
+	0xA09
+};
+
+resource rWindColor (0x1000) {
+	0x0, // frame
+	0xF0F, // title/close/zoom
+	0x0, // tbar
+	0xF0FF, // grow
+	0xF0 // info
+};
+
+
+resource rControlList (0x1000) {
+	{
+		0x1,
+		0x2,
+		0x3,
+	}
+};
+
+resource rControlTemplate (0x1) {
+	0x2,
+	{4, 4, WIN_HEIGHT - 21, WIN_WIDTH - 4},
+	editTextControl {
+		 {	/* optional Fields */
+			0x0,
+			0x7400,
+			0x3,
+			0x23A80000,
+			{-1, -1, -1, -1},
+			0x0,
+			0,
+			0x0,
+			0,
+			0x0,
+			0x15,
+			0x4,
+			0,
+			255, /* max chars */
+			0,
+			0,
+			0,
+			0x0,
+			0x0,
+			0x0
+		}
+	}
+};
+
+
+resource rControlTemplate (0x2) {
+	0x4,
+	{WIN_HEIGHT - 4 - BUTTON_HEIGHT, 4, WIN_HEIGHT - 4, 4 + BUTTON_WIDTH},
+	SimpleButtonControl {
+		 {	/* optional Fields */
+			0x3,
+			0x3002,
+			kPlayID,
+			0x1000F,
+			0x0,
+			{
+				"\n",
+				"\n",
+				0x100,
+				0x100
+			}
+		}
+	}
+};
+
+resource rControlTemplate (0x3) {
+	0x5,
+	{WIN_HEIGHT - 4 - BUTTON_HEIGHT, WIN_WIDTH - 4 - BUTTON_WIDTH, WIN_HEIGHT - 4, WIN_WIDTH - 4},
+	SimpleButtonControl {
+		 {	/* optional Fields */
+			0x2,
+			0x3002,
+			kStopID,
+			0x10010,
+			0x0,
+			{
+				".",
+				".",
+				0x100,
+				0x100
+			}
+		}
+	}
+};
+
+resource rPString (0x1, locked, fixed, nocrossbank, nospecialmemory) {
+	"@"
+};
+
+resource rPString (0x2, locked, fixed, nocrossbank, nospecialmemory) {
+	"  File  "
+};
+
+resource rPString (0x3, locked, fixed, nocrossbank, nospecialmemory) {
+	"  Edit  "
+};
+
+resource rPString (0xFA, locked, fixed, nocrossbank, nospecialmemory) {
+	"Undo"
+};
+
+resource rPString (0xFB, locked, fixed, nocrossbank, nospecialmemory) {
+	"Cut"
+};
+
+resource rPString (0xFC, locked, fixed, nocrossbank, nospecialmemory) {
+	"Copy"
+};
+
+resource rPString (0xFD, locked, fixed, nocrossbank, nospecialmemory) {
+	"Paste"
+};
+
+resource rPString (0xFE, locked, fixed, nocrossbank, nospecialmemory) {
+	"Clear"
+};
+
+resource rPString (0xFF, locked, fixed, nocrossbank, nospecialmemory) {
+	"Close"
+};
+
+resource rPString (0x100, locked, fixed, nocrossbank, nospecialmemory) {
+	"About..."
+};
+
+resource rPString (0x101, locked, fixed, nocrossbank, nospecialmemory) {
+	"Quit"
+};
+
+/*
+resource rPString (0x102, locked, fixed, nocrossbank, nospecialmemory) {
+	"New"
+};
+
+resource rPString (0x103, locked, fixed, nocrossbank, nospecialmemory) {
+	"Open..."
+};
+
+resource rPString (0x104, locked, fixed, nocrossbank, nospecialmemory) {
+	"Save"
+};
+
+resource rPString (0x105, locked, fixed, nocrossbank, nospecialmemory) {
+	"Save as..."
+};
+
+resource rPString (0x106, locked, fixed, nocrossbank, nospecialmemory) {
+	"Revert to saved"
+};
+
+
+*/
+
+resource rPString (0x1000E) {
+	" -- --- .-. ... . "
+};
+
+resource rPString (0x1000F) {
+	"Play"
+};
+
+resource rPString (0x10010) {
+	"Stop"
+};
+
+resource rMenuBar (0x1, locked, fixed, nocrossbank, nospecialmemory) {
+	{
+		0x1,
+		0x2,
+		0x3,
+	}
+};
+
+resource rMenu (0x1, locked, fixed, nocrossbank, nospecialmemory) {
+	0x1,
+	0xA008,
+	0x1,
+	{
+		0x100,
+	}
+};
+
+resource rMenu (0x2, locked, fixed, nocrossbank, nospecialmemory) {
+	0x2,
+	0xA008,
+	0x2,
+	{
+		0xFF,
+		0x101,
+	}
+};
+
+resource rMenu (0x3, locked, fixed, nocrossbank, nospecialmemory) {
+	0x3,
+	0xA008,
+	0x3,
+	{
+		0xFA,
+		0xFB,
+		0xFC,
+		0xFD,
+		0xFE,
+	}
+};
+
+resource rMenuItem (0xFA, nocrossbank, nospecialmemory) {
+	0xFA,
+	"Z",
+	"z",
+	0x0,
+	0x8040,
+	0xFA
+};
+
+resource rMenuItem (0xFB, nocrossbank, nospecialmemory) {
+	0xFB,
+	"X",
+	"x",
+	0x0,
+	0x8000,
+	0xFB
+};
+
+resource rMenuItem (0xFC, locked, fixed, nocrossbank, nospecialmemory) {
+	0xFC,
+	"C",
+	"c",
+	0x0,
+	0x8000,
+	0xFC
+};
+
+resource rMenuItem (0xFD, locked, fixed, nocrossbank, nospecialmemory) {
+	0xFD,
+	"V",
+	"v",
+	0x0,
+	0x8000,
+	0xFD
+};
+
+resource rMenuItem (0xFE, nocrossbank, nospecialmemory) {
+	0xFE,
+	"",
+	"",
+	0x0,
+	0x8000,
+	0xFE
+};
+
+resource rMenuItem (0xFF, nocrossbank, nospecialmemory) {
+	0xFF,
+	"W",
+	"w",
+	0x0,
+	0x8000,
+	0xFF
+};
+
+resource rMenuItem (0x100, nocrossbank, nospecialmemory) {
+	0x100,
+	"",
+	"",
+	0x0,
+	0x8040,
+	0x100
+};
+
+resource rMenuItem (0x101, nocrossbank, nospecialmemory) {
+	0x101,
+	"Q",
+	"q",
+	0x0,
+	0x8000,
+	0x101
+};
+
+/*
+resource rMenuItem (0x102, nocrossbank, nospecialmemory) {
+	0x102,
+	"N",
+	"n",
+	0x0,
+	0x8000,
+	0x102
+};
+
+resource rMenuItem (0x103, locked, fixed, nocrossbank, nospecialmemory) {
+	0x103,
+	"O",
+	"o",
+	0x0,
+	0x8040,
+	0x103
+};
+
+resource rMenuItem (0x104, locked, fixed, nocrossbank, nospecialmemory) {
+	0x104,
+	"S",
+	"s",
+	0x0,
+	0x8000,
+	0x104
+};
+
+resource rMenuItem (0x105, locked, fixed, nocrossbank, nospecialmemory) {
+	0x105,
+	"",
+	"",
+	0x0,
+	0x8000,
+	0x105
+};
+
+resource rMenuItem (0x106, locked, fixed, nocrossbank, nospecialmemory) {
+	0x106,
+	"",
+	"",
+	0x0,
+	0x8040,
+	0x106
+};
+*/
+
+resource rToolStartup (0x1) {
+	0xC080,
+	{
+		0x3, 0x300,
+		0x4, 0x301,
+		0x5, 0x302,
+		0x6, 0x300,
+		0xB, 0x200,
+		0xE, 0x301,
+		0xF, 0x301,
+		0x10, 0x301,
+		0x12, 0x301,
+		0x13, 0x300,
+		0x14, 0x301,
+		0x15, 0x301,
+		0x16, 0x300,
+		0x17, 0x301,
+		0x1B, 0x301,
+		0x1C, 0x301,
+		0x1E, 0x100,
+		0x22, 0x101
+	}
+};
+
+
+resource rAlertString (0x1) {
+	"40~"
+	".... .- -.-. -.- ..-. . ... -"
+	" ..--- ----- ..--- -----"
+	"\n\n\n"
+	"-.- . .-.. ...- .. -."
+	" ... .... . .-. .-.. --- -.-. -.-"
+	"~^Ok\0x00"
+};
+
+resource rText (0x4) {
+	"CDQ"
+};
+
+resource rVersion (0x1) {
+	{
+		0x1,
+		0x0,
+		0x0,
+		release,
+		0x0
+	},
+	verUS,
+	"-- --- .-. ... .",
+	"-- --- .-. ... ."
+};
+
+resource rComment (0x1) {
+	".... .- -.-. -.- ..-. . ... -"
+	" ..--- ----- ..--- -----"
+	"\n\n\n"
+	"-.- . .-.. ...- .. -."
+	" ... .... . .-. .-.. --- -.-. -.-"
+};
+
