@@ -6,8 +6,9 @@
 #define MENU_HEIGHT 12
 #define BUTTON_HEIGHT 13
 #define BUTTON_WIDTH 90
-#define kPlayID 1
-#define kStopID 2
+#define kTextEdit 1
+#define kPlayID 2
+#define kStopID 3
 
 resource rWindParam1 (0x1000) {
 	0x8020,
@@ -46,14 +47,14 @@ resource rControlList (0x1000) {
 };
 
 resource rControlTemplate (0x1) {
-	0x2,
+	kTextEdit,
 	{4, 4, WIN_HEIGHT - 21, WIN_WIDTH - 4},
 	editTextControl {
 		 {	/* optional Fields */
 			0x0,
 			0x7400,
 			0x3,
-			0x23A80000,
+			fSingleStyle+fTabSwitch+fSmartCutPaste+fDrawBounds+fColorHilight+fDrawInactiveSelection,
 			{-1, -1, -1, -1},
 			0x0,
 			0,
@@ -76,13 +77,13 @@ resource rControlTemplate (0x1) {
 
 
 resource rControlTemplate (0x2) {
-	0x4,
+	kPlayID,
 	{WIN_HEIGHT - 4 - BUTTON_HEIGHT, 4, WIN_HEIGHT - 4, 4 + BUTTON_WIDTH},
 	SimpleButtonControl {
 		 {	/* optional Fields */
-			0x3,
+			SquareShadowButton,
 			0x3002,
-			kPlayID,
+			0,
 			0x1000F,
 			0x0,
 			{
@@ -96,13 +97,13 @@ resource rControlTemplate (0x2) {
 };
 
 resource rControlTemplate (0x3) {
-	0x5,
+	kStopID,
 	{WIN_HEIGHT - 4 - BUTTON_HEIGHT, WIN_WIDTH - 4 - BUTTON_WIDTH, WIN_HEIGHT - 4, WIN_WIDTH - 4},
 	SimpleButtonControl {
 		 {	/* optional Fields */
-			0x2,
+			SquareButton+CtlInactive,
 			0x3002,
-			kStopID,
+			0,
 			0x10010,
 			0x0,
 			{
@@ -159,6 +160,14 @@ resource rPString (0x101, locked, fixed, nocrossbank, nospecialmemory) {
 	"Quit"
 };
 
+resource rPString (0x102, locked, fixed, nocrossbank, nospecialmemory) {
+	"Select All"
+};
+
+resource rPString (0x103, locked, fixed, nocrossbank, nospecialmemory) {
+	"Preferences..."
+};
+
 /*
 resource rPString (0x102, locked, fixed, nocrossbank, nospecialmemory) {
 	"New"
@@ -209,6 +218,7 @@ resource rMenu (0x1, locked, fixed, nocrossbank, nospecialmemory) {
 	0x1,
 	{
 		0x100,
+		0x103,
 	}
 };
 
@@ -232,6 +242,7 @@ resource rMenu (0x3, locked, fixed, nocrossbank, nospecialmemory) {
 		0xFC,
 		0xFD,
 		0xFE,
+		0x102
 	}
 };
 
@@ -294,7 +305,7 @@ resource rMenuItem (0x100, nocrossbank, nospecialmemory) {
 	"",
 	"",
 	0x0,
-	0x8040,
+	0x8000,
 	0x100
 };
 
@@ -306,6 +317,26 @@ resource rMenuItem (0x101, nocrossbank, nospecialmemory) {
 	0x8000,
 	0x101
 };
+
+resource rMenuItem (0x102, nocrossbank, nospecialmemory) {
+	0x102,
+	"A",
+	"a",
+	0x0,
+	0x8000,
+	0x102
+};
+
+
+resource rMenuItem (0x103, nocrossbank, nospecialmemory) {
+	0x103,
+	"",
+	"",
+	0x0,
+	0x8000+rMIDisabled+rMIDivider,
+	0x103
+};
+
 
 /*
 resource rMenuItem (0x102, nocrossbank, nospecialmemory) {

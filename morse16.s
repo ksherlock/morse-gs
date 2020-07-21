@@ -13,8 +13,9 @@
 *	lst on
 
 kWindowID equ $1000
-kPlayID	equ 1
-kStopID	equ 2
+kTextEdit equ 1
+kPlayID	equ 2
+kStopID	equ 3
 kAboutAlert equ 1
 
 	tbx on
@@ -105,9 +106,9 @@ mainloop
 	_InitCursor
 	stz quit
 
-	lda #$0001ffff
+	lda #$001fffff
 	sta event+owmTaskMask
-	lda #^$0001ffff
+	lda #^$001fffff
 	sta event+owmTaskMask+2
 
 :loop
@@ -120,6 +121,7 @@ mainloop
 	bcs :loop
 
 	asl
+	tax
 	jsr (:table,x)
 	lda quit
 	beq :loop
@@ -200,9 +202,19 @@ menu
 	dw :rts ; 253 paste
 	dw :rts ; 254 clear
 	dw :rts ; 255 close
-	dw bye ; 256 - quit
-	dw about
+	dw about ; 256 about
+	dw bye ; 257 quit
+	dw :select ;  258 - select all
+	dw :rts ;  259 - preferences
 :table_size = {*-:table}/2
+
+
+:select
+	psl #0
+	psl #255
+	psl #0
+	_TESetSelection
+	rts
 
 about
 	pha
@@ -224,6 +236,7 @@ control
 
 :table
 	dw :rts ; 0 - none
+	dw :rts ; text edit. 
 	dw play
 	dw stop
 :table_size = {*-:table}/2
