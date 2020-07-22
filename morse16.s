@@ -55,6 +55,8 @@ docmode mac
 	<<<
 
 
+
+
 main
 	mx %00
 	phk
@@ -94,14 +96,26 @@ mainloop
 	psl #kWindowID
 	psw #rWindParam1
 	_NewWindow2
-	lda 3,s
-	sta window+2
-	lda 1,s
-	sta window
-*	pll window
+	pll window
 
-*	psl window
+	pha
+	pha
+	psl window
+	psw #singlePtr
+	psl #:ctemplate
+	_NewControl2
+	pll cctrl
+
+
+	psl window
 	_ShowWindow
+
+
+*	psw #'x'
+*	psl cctrl
+*	_SetCtlValue
+
+
 
 	_InitCursor
 	stz quit
@@ -130,7 +144,7 @@ mainloop
 	rts
 
 :table
-	dw :idle ; null
+	dw idle ; null
 	dw :rts ; mouse down
 	dw :rts ; mouse up
 	dw :rts ; key down
@@ -167,11 +181,34 @@ mainloop
 	dw :rts ; wInControlMenu
 :table_size = {*-:table}/2
 
-:idle
+
+	ext char_control
+:ctemplate	dw 6 ; pcount
+		adrl 0 ; id
+		dw 100-4-13,200-8,100-4,200+8 ; rect
+		adrl char_control ; proc
+		dw 0 ; flag
+		dw 0 ; more flags
+		adrl 0 ; refcon
+
+idle
 	lda _finished
-	beq :rts
+	beq :c
 	stz _finished
 	brl stopped
+
+:c	lda _current
+*	beq :rts
+	bmi :rts
+	ora #$8000
+	sta _current
+	and #$00ff
+	pha
+	psl cctrl
+	_SetCtlValue
+* set the control char.
+
+:rts	rts
 
 bye
 	lda #1
@@ -342,6 +379,11 @@ stopped
 	psl #kStopID
 	_HiliteCtlByID
 
+
+	psw #' '
+	psl cctrl
+	_SetCtlValue
+
 	rts
 
 
@@ -355,6 +397,7 @@ start_audio
 	stz _on
 	stz _active
 	stz _finished
+	stz _current
 
 	sep $30
 
@@ -440,11 +483,18 @@ stop_audio
 
 	rep #$30
 	stz _finished
+	stz _current
 
 	rts
 
 audio_irq
 	mx %11
+
+
+	docmode
+	lda #$e0
+	sta >SoundAddr
+	lda >SoundData ; osc interrupt register. needed to clear the interrupt
 
 	lda >_active
 	bne :ok
@@ -456,7 +506,6 @@ audio_irq
 	phk
 	plb
 
-	docmode
 
 	rep $30
 
@@ -497,6 +546,7 @@ audio_irq
 	lda _buffer,x
 	and #$7f
 	beq :fini
+	sta _current
 
 	inx
 	stx _index
@@ -792,6 +842,7 @@ old_irq	ds 4
 
 tools	ds 4
 window	ds 4
+cctrl	ds 4
 MyID	ds 2
 
 
@@ -805,6 +856,7 @@ event	ds wmTaskRecSize
 _active		ds 2
 _finished	ds 2
 _on		ds 2
+_current	ds 2
 
 _template	ds 4
 _index		ds 2
@@ -813,6 +865,8 @@ _buffer		ds 256
 
 	dat 8
 
+	typ $b3
+*	aux $db03
 	sav morse16.l
 *	lst on
 	sym
