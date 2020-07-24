@@ -880,7 +880,7 @@ _buffer		ds 256
 
 	typ $b3
 *	aux $db03
-	sav morse16.l
+	sav morse.gs.l
 *	lst on
 	sym
 
