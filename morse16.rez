@@ -11,7 +11,7 @@
 #define kStopID 3
 
 resource rWindParam1 (0x1000) {
-	0x8020,
+	fTitle + fVis + fMove,
 	0x1000E,
 	0x0,
 	{0, 0, 0, 0},

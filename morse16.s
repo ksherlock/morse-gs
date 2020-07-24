@@ -735,16 +735,16 @@ init_audio
 
 	lda #$e1
 	sta >SoundAddr
-	lda #31*2
+	lda #17*2 ; 18 osc = 44744.3125 hz
 	sta >SoundData
 
 * osc 1/2 are 256 bytes, running at the natural rate.
 
 * osc 5/6/7 are 256 bytes, running at 1 / 3 / 6 time units 
-
-t1_freq = 5103
-t3_freq = 1701
-t7_freq = 729
+SR	= 44744
+t1_freq = $01000000*8/SR ;5103
+t3_freq = $01000000*8/SR/3 ; 1701
+t7_freq = $01000000*8/SR/7 ; 729
 
 * frequency low registers
 	lda #$00
