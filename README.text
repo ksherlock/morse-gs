@@ -1,0 +1,9 @@
+Well, this was supposed to be a KansasFest 2020 HackFest entry but I missed
+the deadline because I was busy making a pretty video of it in action. Not the
+first, and probably not the last time that has happened.
+
+A Desktop IIgs program to play morse code in better-than CD (44.4KHz) audio.
+
+Most IIgs emulators have awful Ensoniq emulation.  GS+ drops samples and 
+sweet 16 is over eager to play samples (ie, it doesn't stop when it ought to).
+
