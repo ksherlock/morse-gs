@@ -576,6 +576,15 @@ audio_irq
 *	stz _index
 	stz _active
 	inc _finished
+
+	sep $30
+* disable the silent generators.
+	lda #$a0+noise_left
+	sta >SoundAddr
+	lda ##%0000_0_00_1 ; stopped
+	sta >SoundData
+	sta >SoundData
+
 	bra :exit
 
 :space	mx %00
@@ -733,6 +742,10 @@ init_audio
 
 * osc 5/6/7 are 256 bytes, running at 1 / 3 / 6 time units 
 
+t1_freq = 5103
+t3_freq = 1701
+t7_freq = 729
+
 * frequency low registers
 	lda #$00
 	sta >SoundAddr
@@ -743,11 +756,11 @@ init_audio
 	sta >SoundData
 	sta >SoundData
 
-	lda #<5103
+	lda #<t1_freq
 	sta >SoundData
-	lda #<1701
+	lda #<t3_freq
 	sta >SoundData
-	lda #<729
+	lda #<t7_freq
 	sta >SoundData
 
 * freq high
@@ -760,11 +773,11 @@ init_audio
 	sta >SoundData
 	sta >SoundData
 
-	lda #>5103
+	lda #>t1_freq
 	sta >SoundData
-	lda #>1701
+	lda #>t3_freq
 	sta >SoundData
-	lda #>729
+	lda #>t7_freq
 	sta >SoundData
 
 
